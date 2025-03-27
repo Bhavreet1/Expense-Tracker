@@ -1,0 +1,284 @@
+body {
+  margin: 0;
+  padding: 0;
+  background-color: rgb(245, 249, 250);
+  color: rgb(61, 61, 61);
+  width: 100%;
+  font-family: "Lucida Sans", "Lucida Sans Regular", "Lucida Grande", "Lucida Sans Unicode", Geneva, Verdana, sans-serif;
+}
+body .phone {
+  display: none;
+}
+body h1 {
+  padding: 0 2.5rem;
+  font-size: 3rem;
+}
+body main {
+  display: flex;
+  justify-content: space-evenly;
+}
+body main .left {
+  position: relative;
+  overflow-y: scroll;
+  overflow-x: hidden;
+  height: 75vh;
+  width: 45%;
+  background-color: #feeae9;
+  border-radius: 4rem;
+  border: 1.3px solid rgba(251, 158, 155, 0.3529411765);
+}
+body main .left table {
+  position: relative;
+  width: 89%;
+  text-align: center;
+  margin: 0 2rem;
+  padding: 0 1rem;
+}
+body main .left table td {
+  padding: 1rem 0;
+  color: #a57573;
+  text-align: left;
+}
+body main .left table th {
+  position: sticky;
+  top: 5.6rem;
+  left: 0;
+  background: linear-gradient(to bottom, #feeae9 60%, transparent);
+  color: #fb9e9b;
+  text-align: left;
+  padding: 1rem 0;
+}
+body main .left table td:nth-child(1) {
+  width: 20%;
+}
+body main .left table td:nth-child(2) {
+  width: 35%;
+}
+body main .left table td:nth-child(3) {
+  width: 30%;
+}
+body main .left table td:nth-child(4) {
+  width: 10%;
+}
+body main .left table button {
+  margin-top: 0.7rem;
+  background-color: #fdbfbd;
+  color: #ffefef;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 10px;
+  transition: all 0.4s ease;
+  outline: none;
+}
+body main .left table button:hover {
+  background-color: #d7a2a1;
+  cursor: pointer;
+}
+body main .left h2 {
+  position: sticky;
+  top: 0;
+  left: 0;
+  z-index: 1;
+  padding: 3rem 2rem 1.1rem 2rem;
+  color: #fb9e9b;
+  margin: 0;
+  background-color: #feeae9;
+}
+body main .right {
+  width: 45%;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+body main .right .top {
+  height: 47%;
+  border-radius: 4rem;
+  border: 1.3px solid rgba(146, 201, 198, 0.4196078431);
+  background-color: #e2f8f5;
+}
+body main .right .top h2 {
+  padding: 2rem;
+  padding-bottom: 1rem;
+  color: #92c9c6;
+}
+body main .right .top .table {
+  width: 100%;
+  text-align: center;
+  margin: 0;
+}
+body main .right .top .table .thead .tr {
+  width: 100%;
+  display: flex;
+  justify-content: space-evenly;
+  flex-wrap: wrap;
+  padding: 1rem 0;
+}
+body main .right .top .table .thead .tr .td {
+  color: #7aaeac;
+  text-align: left;
+  display: flex;
+  flex-direction: column;
+  font-weight: 500;
+}
+body main .right .top .table .tbody {
+  width: 100%;
+}
+body main .right .top .table .tbody .tr {
+  padding: 0.5rem 0;
+  display: flex;
+  justify-content: space-evenly;
+  flex-wrap: nowrap;
+}
+body main .right .top .table .tbody .tr .tr:nth-child(1) {
+  width: 22%;
+}
+body main .right .top .table .tbody .tr .tr:nth-child(1) input {
+  width: 100%;
+}
+body main .right .top .table input,
+body main .right .top .table select {
+  border-radius: 0.5rem;
+  outline: none;
+  background-color: transparent;
+  border: 1px solid #7aa9a7;
+  padding: 0.5rem 0 0.5rem 0.5rem;
+  color: #7cabaa;
+  overflow: hidden;
+}
+body main .right .top .table input::-moz-placeholder, body main .right .top .table select::-moz-placeholder {
+  color: #7cabaa;
+}
+body main .right .top .table input::placeholder,
+body main .right .top .table select::placeholder {
+  color: #7cabaa;
+}
+body main .right .top .table button {
+  background-color: #92c9c6;
+  color: #d9fcfb;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 10px;
+  transition: all 0.4s ease;
+  cursor: pointer;
+}
+body main .right .top .table button:hover {
+  color: #d9fcfb;
+  background-color: #7aa9a7;
+}
+body main .right .bottom {
+  border: 1.3px solid rgba(182, 164, 221, 0.4039215686);
+  background-color: #ece9f0;
+  border-radius: 4rem;
+  height: 47%;
+}
+body main .right .bottom h2 {
+  padding: 2rem;
+  color: #b6a4dd;
+}
+body main .right .bottom h1 {
+  padding-top: 0;
+  margin: 0;
+  text-align: right;
+  font-size: 4rem;
+  line-height: 2rem;
+  color: #8172a2;
+}
+
+.left::-webkit-scrollbar {
+  display: none;
+  width: 4px;
+  background-color: #1d1d1d;
+}
+
+@media (max-width: 1024px) {
+  body {
+    height: 100vh;
+  }
+  body .phone {
+    text-align: center;
+    padding-top: 50%;
+  }
+  body main {
+    flex-direction: column;
+  }
+}
+@media (max-width: 1024px) {
+  body h1 {
+    font-size: 2rem;
+  }
+  body main {
+    align-items: center;
+  }
+  body main .left,
+  body main .right {
+    width: 90%;
+  }
+  body main .left .bottom,
+  body main .right .bottom {
+    margin: 1rem 0;
+  }
+  body main .left .bottom h2,
+  body main .right .bottom h2 {
+    padding-bottom: 2rem;
+    text-align: center;
+    color: #b6a4dd;
+  }
+  body main .left .bottom h1,
+  body main .right .bottom h1 {
+    font-size: 4rem;
+    padding-bottom: 3rem;
+    text-align: center;
+  }
+  body main .left table,
+  body main .right table {
+    width: 90%;
+    position: relative;
+    width: 100%;
+    text-align: center;
+    padding: 0 1rem;
+    margin: 0;
+    font-size: 15px;
+  }
+  body main .left {
+    margin: 1rem 0;
+  }
+}
+@media (max-width: 600px) {
+  body h1 {
+    font-size: 2rem;
+  }
+  body main .left,
+  body main .right {
+    width: 90%;
+  }
+  body main .left .bottom,
+  body main .right .bottom {
+    margin: 1rem 0;
+  }
+  body main .left .bottom h2,
+  body main .right .bottom h2 {
+    padding-bottom: 2rem;
+    text-align: center;
+    color: #b6a4dd;
+  }
+  body main .left .bottom h1,
+  body main .right .bottom h1 {
+    font-size: 4rem;
+    padding-bottom: 3rem;
+    text-align: center;
+  }
+  body main .left table,
+  body main .right table {
+    width: 90%;
+    position: relative;
+    width: 100%;
+    text-align: center;
+    padding: 0 1rem;
+    margin: 0;
+    font-size: 10px;
+  }
+  body main .left {
+    max-height: 400px;
+    margin: 1rem 0;
+  }
+}
