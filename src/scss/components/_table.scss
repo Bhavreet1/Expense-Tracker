@@ -1,0 +1,157 @@
+@use '../abstracts/variables' as *;
+@use '../abstracts/mixins' as *;
+
+.table-wrapper,
+.table-container {
+  overflow-x: auto;
+  @include custom-scrollbar;
+  border-radius: $radius-md;
+  border: 1px solid $border-color;
+  background-color: $surface-primary;
+}
+
+table.expense-table,
+table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+  font-size: 0.875rem;
+
+  thead {
+    background-color: $surface-elevated;
+
+    tr {
+      border-bottom: 1px solid $border-color;
+    }
+
+    th {
+      padding: 0.625rem 0.875rem;
+      font-size: 0.75rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: $text-secondary;
+      white-space: nowrap;
+      user-select: none;
+
+      &[data-sort] {
+        cursor: pointer;
+
+        &:hover {
+          color: $text-primary;
+        }
+      }
+
+      .sort-icon {
+        display: inline-block;
+        margin-left: 4px;
+        font-size: 0.7rem;
+      }
+    }
+  }
+
+  tbody {
+    tr {
+      border-bottom: 1px solid $border-subtle;
+      transition: background-color $transition-fast;
+
+      &:hover {
+        background-color: $surface-hover;
+      }
+
+      &:last-child {
+        border-bottom: none;
+      }
+    }
+
+    td {
+      padding: 0.625rem 0.875rem;
+      vertical-align: middle;
+      color: $text-primary;
+    }
+  }
+
+  .col-amount {
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .col-date {
+    color: $text-secondary;
+    font-size: 0.8125rem;
+    white-space: nowrap;
+  }
+
+  .col-note {
+    .note-text {
+      color: $text-secondary;
+      font-size: 0.8125rem;
+      max-width: 180px;
+      display: inline-block;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      vertical-align: middle;
+    }
+
+    .note-empty {
+      color: $text-muted;
+    }
+  }
+
+  .col-actions {
+    text-align: right;
+  }
+}
+
+.category-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 8px;
+  border-radius: $radius-pill;
+  font-size: 0.75rem;
+  font-weight: 500;
+  background-color: $surface-elevated;
+  border: 1px solid $border-color;
+  color: $text-primary;
+  white-space: nowrap;
+}
+
+.table-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 4px;
+
+  .action-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    padding: 0;
+    border-radius: $radius-sm;
+    border: 1px solid transparent;
+    background: transparent;
+    color: $text-secondary;
+    cursor: pointer;
+    transition: all $transition-fast;
+
+    &:hover {
+      background-color: $surface-elevated;
+      color: $text-primary;
+      border-color: $border-color;
+    }
+
+    &--delete:hover {
+      background-color: $danger-subtle;
+      color: $danger;
+      border-color: rgba(239, 68, 68, 0.25);
+    }
+
+    svg {
+      width: 14px;
+      height: 14px;
+    }
+  }
+}

@@ -1,0 +1,37 @@
+@use '../abstracts/variables' as *;
+@use '../abstracts/mixins' as *;
+
+.container {
+  max-width: 1140px;
+  margin: 0 auto;
+  padding: $space-6;
+
+  @include respond-to(mobile) {
+    padding: $space-4;
+  }
+}
+
+.dashboard-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.4fr) minmax(320px, 1fr);
+  gap: $space-6;
+  align-items: start;
+
+  @include respond-to(tablet) {
+    grid-template-columns: 1fr;
+    gap: $space-5;
+  }
+
+  &__main {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+  }
+
+  &__sidebar {
+    display: flex;
+    flex-direction: column;
+    gap: $space-5;
+    min-width: 0;
+  }
+}

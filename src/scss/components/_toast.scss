@@ -1,0 +1,98 @@
+@use '../abstracts/variables' as *;
+@use '../abstracts/mixins' as *;
+
+.toast-container {
+  position: fixed;
+  bottom: $space-5;
+  right: $space-5;
+  display: flex;
+  flex-direction: column;
+  gap: $space-2;
+  z-index: 1050;
+  pointer-events: none;
+  max-width: calc(100vw - 2rem);
+}
+
+.toast {
+  display: flex;
+  align-items: center;
+  gap: $space-3;
+  padding: 0.625rem 0.875rem;
+  background-color: $surface-elevated;
+  border: 1px solid $border-color;
+  border-radius: $radius-md;
+  box-shadow: $shadow-md;
+  color: $text-primary;
+  font-size: 0.875rem;
+  pointer-events: auto;
+  opacity: 0;
+  transform: translateY(12px);
+  transition: opacity $transition-fast, transform $transition-fast;
+  max-width: 380px;
+
+  &--visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  &--leaving {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+
+  &--success {
+    border-left: 3px solid $success;
+  }
+
+  &--error {
+    border-left: 3px solid $danger;
+  }
+
+  &--info {
+    border-left: 3px solid $accent;
+  }
+
+  &__message {
+    flex: 1;
+    line-height: 1.35;
+    word-break: break-word;
+  }
+
+  &__action-btn {
+    background: transparent;
+    border: 1px solid $border-color;
+    border-radius: $radius-sm;
+    color: $text-primary;
+    padding: 2px 8px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    cursor: pointer;
+    white-space: nowrap;
+
+    &:hover {
+      background-color: $surface-hover;
+      border-color: $text-muted;
+    }
+  }
+
+  &__close-btn {
+    background: transparent;
+    border: none;
+    padding: 2px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: $text-muted;
+    cursor: pointer;
+    line-height: 1;
+
+    &:hover {
+      color: $text-primary;
+    }
+
+    svg {
+      width: 14px;
+      height: 14px;
+    }
+  }
+}

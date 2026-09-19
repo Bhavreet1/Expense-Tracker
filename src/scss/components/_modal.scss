@@ -1,0 +1,135 @@
+@use '../abstracts/variables' as *;
+@use '../abstracts/mixins' as *;
+
+.modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(0, 0, 0, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition: opacity $transition-fast, visibility $transition-fast;
+
+  &--open {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+
+    .modal__dialog {
+      transform: translateY(0);
+      opacity: 1;
+    }
+  }
+
+  &__dialog {
+    background-color: $surface-primary;
+    border: 1px solid $border-color;
+    border-radius: $radius-lg;
+    box-shadow: $shadow-lg;
+    width: calc(100% - 2rem);
+    max-width: 480px;
+    max-height: 90vh;
+    overflow-y: auto;
+    @include custom-scrollbar;
+    padding: $space-5;
+    transform: translateY(8px);
+    opacity: 0;
+    transition: transform $transition-fast, opacity $transition-fast;
+
+    &--lg {
+      max-width: 680px;
+    }
+  }
+
+  &__header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: $space-4;
+
+    h3 {
+      font-size: 1.125rem;
+      font-weight: 600;
+      color: $text-primary;
+      margin: 0;
+    }
+  }
+
+  &__close {
+    background: transparent;
+    border: none;
+    padding: 4px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: $text-muted;
+    border-radius: $radius-sm;
+    cursor: pointer;
+    transition: color $transition-fast, background-color $transition-fast;
+
+    &:hover {
+      color: $text-primary;
+      background-color: $surface-elevated;
+    }
+
+    svg {
+      width: 18px;
+      height: 18px;
+    }
+  }
+
+  &__body {
+    display: flex;
+    flex-direction: column;
+    gap: $space-3;
+  }
+
+  &__footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: $space-2;
+    margin-top: $space-4;
+    padding-top: $space-3;
+    border-top: 1px solid $border-subtle;
+  }
+}
+
+.category-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 8px;
+  background-color: $surface-elevated;
+  border: 1px solid $border-color;
+  border-radius: $radius-pill;
+  font-size: 0.75rem;
+  color: $text-secondary;
+
+  &__remove {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: transparent;
+    border: none;
+    padding: 0;
+    cursor: pointer;
+    color: $text-muted;
+    line-height: 1;
+
+    &:hover {
+      color: $danger;
+    }
+
+    svg {
+      width: 12px;
+      height: 12px;
+    }
+  }
+}

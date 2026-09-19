@@ -1,0 +1,84 @@
+@use '../abstracts/variables' as *;
+@use '../abstracts/mixins' as *;
+
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: $space-3;
+  margin-bottom: $space-3;
+
+  @include respond-to(mobile) {
+    grid-template-columns: 1fr;
+    gap: $space-2;
+  }
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: $space-1;
+  margin-bottom: $space-3;
+
+  &:last-child {
+    margin-bottom: 0;
+  }
+
+  label {
+    font-size: 0.8125rem;
+    font-weight: 500;
+    color: $text-secondary;
+  }
+
+  input,
+  select,
+  textarea {
+    width: 100%;
+    padding: 0.55rem 0.75rem;
+    border-radius: $radius-md;
+    border: 1px solid $border-color;
+    background-color: $surface-elevated;
+    color: $text-primary;
+    font-family: inherit;
+    font-size: 0.875rem;
+    line-height: 1.4;
+    transition: border-color $transition-fast, box-shadow $transition-fast;
+
+    &::placeholder {
+      color: $text-muted;
+    }
+
+    &:focus {
+      outline: none;
+      border-color: $accent;
+      box-shadow: 0 0 0 1px $accent;
+      background-color: #27272a;
+    }
+
+    /* Hide number arrows */
+    &[type="number"] {
+      -moz-appearance: textfield;
+      appearance: none;
+
+      &::-webkit-outer-spin-button,
+      &::-webkit-inner-spin-button {
+        -webkit-appearance: none;
+        margin: 0;
+      }
+    }
+  }
+
+  select {
+    cursor: pointer;
+
+    option {
+      background-color: $surface-elevated;
+      color: $text-primary;
+    }
+  }
+
+  /* Style date input calendar icon */
+  input[type="date"]::-webkit-calendar-picker-indicator {
+    filter: invert(0.8);
+    cursor: pointer;
+  }
+}

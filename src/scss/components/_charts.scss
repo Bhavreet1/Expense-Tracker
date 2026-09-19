@@ -1,0 +1,37 @@
+@use '../abstracts/variables' as *;
+@use '../abstracts/mixins' as *;
+
+.charts-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: $space-3;
+  margin-top: $space-3;
+
+  @include respond-to(tablet) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.chart-card {
+  background-color: $surface-elevated;
+  border: 1px solid $border-subtle;
+  border-radius: $radius-md;
+  padding: $space-3;
+  display: flex;
+  flex-direction: column;
+
+  &__title {
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: $text-secondary;
+    margin-bottom: $space-2;
+  }
+
+  &__canvas-wrapper {
+    position: relative;
+    height: 160px;
+    width: 100%;
+  }
+}

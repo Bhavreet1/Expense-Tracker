@@ -1,0 +1,99 @@
+@use '../abstracts/variables' as *;
+@use '../abstracts/mixins' as *;
+
+.card {
+  background-color: $surface-primary;
+  border: 1px solid $border-color;
+  border-radius: $radius-lg;
+  padding: $space-5;
+  display: flex;
+  flex-direction: column;
+  gap: $space-4;
+  position: relative;
+
+  &--accent {
+    border-left: 3px solid $accent;
+  }
+
+  // Graceful fallback for any legacy card--primary usage
+  &--primary {
+    border-left: 3px solid $accent;
+  }
+
+  &__header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    .card__title,
+    h2 {
+      font-size: 1rem;
+      font-weight: 600;
+      color: $text-primary;
+      margin: 0;
+    }
+  }
+
+  .total-value {
+    font-size: 2rem;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    color: $text-primary;
+    line-height: 1.1;
+  }
+
+  .total-subtitle {
+    font-size: 0.8125rem;
+    color: $text-muted;
+    margin: -$space-2 0 0 0;
+  }
+
+  .monthly-stat-box {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: $space-3;
+    background-color: $surface-elevated;
+    border: 1px solid $border-subtle;
+    border-radius: $radius-md;
+    font-size: 0.875rem;
+
+    strong {
+      color: $text-secondary !important;
+      font-weight: 500;
+      font-size: 0.8125rem;
+    }
+
+    span {
+      color: $text-primary !important;
+      font-weight: 600;
+    }
+  }
+
+  .stat-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 2px 8px;
+    border-radius: $radius-pill;
+    font-size: 0.75rem;
+    font-weight: 500;
+
+    &--neutral {
+      background-color: $surface-hover;
+      color: $text-muted;
+      border: 1px solid $border-color;
+    }
+
+    &--up {
+      background-color: $danger-subtle;
+      color: $danger;
+      border: 1px solid rgba(239, 68, 68, 0.2);
+    }
+
+    &--down {
+      background-color: $success-subtle;
+      color: $success;
+      border: 1px solid rgba(16, 185, 129, 0.2);
+    }
+  }
+}

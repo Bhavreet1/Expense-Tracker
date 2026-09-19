@@ -1,0 +1,56 @@
+@use 'variables' as *;
+
+@mixin respond-to($breakpoint) {
+  @if $breakpoint == mobile {
+    @media (max-width: #{$bp-mobile}) {
+      @content;
+    }
+  } @else if $breakpoint == tablet {
+    @media (max-width: #{$bp-tablet}) {
+      @content;
+    }
+  } @else if $breakpoint == desktop {
+    @media (min-width: #{$bp-desktop}) {
+      @content;
+    }
+  }
+}
+
+@mixin flex-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+// Flat minimal card mixin
+@mixin flat-card {
+  background-color: $surface-primary;
+  border: 1px solid $border-color;
+  border-radius: $radius-lg;
+  box-shadow: $shadow-sm;
+}
+
+// Temporary alias for backward compatibility during compilation of untouched files
+@mixin glass-card {
+  @include flat-card;
+}
+
+@mixin custom-scrollbar {
+  &::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.12);
+    border-radius: $radius-pill;
+
+    &:hover {
+      background: rgba(255, 255, 255, 0.2);
+    }
+  }
+}

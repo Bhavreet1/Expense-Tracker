@@ -1,0 +1,16 @@
+{
+  "name": "Expense Tracker",
+  "short_name": "Expenses",
+  "description": "Local-first expense tracker with analytics and backup support",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#feeae9",
+  "theme_color": "#feeae9",
+  "icons": [
+    {
+      "src": "/expenses.png",
+      "sizes": "192x192 512x512",
+      "type": "image/png"
+    }
+  ]
+}
