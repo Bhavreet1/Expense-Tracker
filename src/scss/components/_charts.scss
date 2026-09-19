@@ -3,12 +3,14 @@
 
 .charts-grid {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: 1fr;
   gap: $space-3;
   margin-top: $space-3;
+  width: 100%;
+  min-width: 0;
 
-  @include respond-to(tablet) {
-    grid-template-columns: 1fr;
+  @media (min-width: 1140px) {
+    grid-template-columns: 1fr 1fr;
   }
 }
 
@@ -19,6 +21,9 @@
   padding: $space-3;
   display: flex;
   flex-direction: column;
+  min-width: 0;
+  width: 100%;
+  overflow: hidden;
 
   &__title {
     font-size: 0.75rem;
@@ -27,11 +32,25 @@
     letter-spacing: 0.05em;
     color: $text-secondary;
     margin-bottom: $space-2;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 
   &__canvas-wrapper {
     position: relative;
     height: 160px;
+    min-height: 160px;
+    max-height: 160px;
     width: 100%;
+    min-width: 0;
+    overflow: hidden;
+
+    canvas {
+      width: 100% !important;
+      height: 100% !important;
+      max-width: 100%;
+      display: block;
+    }
   }
 }

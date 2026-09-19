@@ -1,7 +1,11 @@
 @use 'variables' as *;
 
 @mixin respond-to($breakpoint) {
-  @if $breakpoint == mobile {
+  @if $breakpoint == xs {
+    @media (max-width: #{$bp-xs}) {
+      @content;
+    }
+  } @else if $breakpoint == mobile {
     @media (max-width: #{$bp-mobile}) {
       @content;
     }
@@ -22,7 +26,18 @@
   justify-content: center;
 }
 
-// Flat minimal card mixin
+// Modern Frosted Glass Card Mixin
+@mixin modern-glass-card {
+  background: $surface-glass;
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid $border-color;
+  border-top-color: $border-glass-top;
+  border-radius: $radius-lg;
+  box-shadow: $shadow-glass-card;
+  transition: transform $transition-normal, box-shadow $transition-normal, border-color $transition-normal;
+}
+
 @mixin flat-card {
   background-color: $surface-primary;
   border: 1px solid $border-color;
@@ -30,9 +45,8 @@
   box-shadow: $shadow-sm;
 }
 
-// Temporary alias for backward compatibility during compilation of untouched files
 @mixin glass-card {
-  @include flat-card;
+  @include modern-glass-card;
 }
 
 @mixin custom-scrollbar {

@@ -19,6 +19,8 @@ body {
   line-height: 1.5;
   color: $text-primary;
   background-color: $bg-primary;
+  background-image: $bg-gradient;
+  background-attachment: fixed;
   min-height: 100vh;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;

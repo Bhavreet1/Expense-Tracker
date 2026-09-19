@@ -21,6 +21,11 @@
       line-height: 1.4;
       transition: border-color $transition-fast, box-shadow $transition-fast;
 
+      @include respond-to(mobile) {
+        font-size: 1rem !important; // Prevent iOS auto-zoom
+        padding: 0.625rem 0.75rem;
+      }
+
       &::placeholder {
         color: $text-muted;
       }
@@ -42,6 +47,12 @@
     border: 1px solid $border-color;
     border-radius: $radius-md;
     margin-top: $space-3;
+
+    @include respond-to(mobile) {
+      grid-template-columns: 1fr;
+      gap: $space-2;
+      padding: $space-3;
+    }
 
     &.is-collapsed {
       display: none !important;

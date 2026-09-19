@@ -3,11 +3,23 @@
 
 .container {
   max-width: 1140px;
+  width: 100%;
   margin: 0 auto;
+  box-sizing: border-box;
   padding: $space-6;
+  padding-left: max(#{$space-6}, env(safe-area-inset-left));
+  padding-right: max(#{$space-6}, env(safe-area-inset-right));
+
+  @include respond-to(tablet) {
+    padding: $space-4;
+    padding-left: max(#{$space-4}, env(safe-area-inset-left));
+    padding-right: max(#{$space-4}, env(safe-area-inset-right));
+  }
 
   @include respond-to(mobile) {
-    padding: $space-4;
+    padding: $space-3;
+    padding-left: max(#{$space-3}, env(safe-area-inset-left));
+    padding-right: max(#{$space-3}, env(safe-area-inset-right));
   }
 }
 
@@ -16,16 +28,43 @@
   grid-template-columns: minmax(0, 1.4fr) minmax(320px, 1fr);
   gap: $space-6;
   align-items: start;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
 
   @include respond-to(tablet) {
-    grid-template-columns: 1fr;
-    gap: $space-5;
+    grid-template-columns: 100%;
+    gap: $space-4;
+
+    .dashboard-grid__sidebar {
+      display: contents;
+    }
+
+    // Smart mobile hierarchy: Form -> Budget -> List -> Analytics
+    section[aria-labelledby="add-expense-title"] {
+      order: 1;
+    }
+
+    #budget-progress-container {
+      order: 2;
+    }
+
+    .dashboard-grid__main {
+      order: 3;
+    }
+
+    .total-display-card {
+      order: 4;
+    }
   }
 
   &__main {
     display: flex;
     flex-direction: column;
     min-width: 0;
+    max-width: 100%;
+    width: 100%;
   }
 
   &__sidebar {
@@ -33,5 +72,7 @@
     flex-direction: column;
     gap: $space-5;
     min-width: 0;
+    max-width: 100%;
+    width: 100%;
   }
 }

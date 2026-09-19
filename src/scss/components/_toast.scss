@@ -11,6 +11,13 @@
   z-index: 1050;
   pointer-events: none;
   max-width: calc(100vw - 2rem);
+
+  @include respond-to(mobile) {
+    bottom: max(#{$space-3}, env(safe-area-inset-bottom));
+    left: $space-3;
+    right: $space-3;
+    max-width: none;
+  }
 }
 
 .toast {
@@ -29,6 +36,11 @@
   transform: translateY(12px);
   transition: opacity $transition-fast, transform $transition-fast;
   max-width: 380px;
+
+  @include respond-to(mobile) {
+    max-width: 100%;
+    width: 100%;
+  }
 
   &--visible {
     opacity: 1;
@@ -50,6 +62,29 @@
 
   &--info {
     border-left: 3px solid $accent;
+  }
+
+  &__icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+
+    .toast-icon--success {
+      color: $success;
+    }
+
+    .toast-icon--error {
+      color: $danger;
+    }
+
+    .toast-icon--warning {
+      color: $warning;
+    }
+
+    .toast-icon--info {
+      color: $accent;
+    }
   }
 
   &__message {

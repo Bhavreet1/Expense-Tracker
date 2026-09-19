@@ -329,6 +329,15 @@ class StateManager {
   }
 
   /**
+   * Set monthly budget limit
+   * @param {number|string} budgetAmount
+   */
+  setMonthlyBudget(budgetAmount) {
+    const budget = Math.max(0, parseFloat(budgetAmount) || 0);
+    this.updateSettings({ monthlyBudget: budget });
+  }
+
+  /**
    * Import data (Merge or Replace)
    */
   importData(envelope, mode = 'merge') {

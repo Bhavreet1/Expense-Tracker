@@ -14,9 +14,17 @@
   margin: $space-4 0;
 
   &__icon {
-    font-size: 2rem;
-    margin-bottom: $space-2;
-    opacity: 0.8;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: $accent;
+    margin-bottom: $space-3;
+    opacity: 0.9;
+
+    svg {
+      width: 44px;
+      height: 44px;
+    }
   }
 
   h3,

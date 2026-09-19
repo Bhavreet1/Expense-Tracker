@@ -10,7 +10,7 @@ import {
   DEFAULT_CATEGORIES,
 } from '../src/js/storage.js';
 import { validateExpense, validateCategoryName } from '../src/js/validation.js';
-import { formatCurrency, formatDate, generateId } from '../src/js/utils.js';
+import { formatCurrency, formatDate, generateId, getYesterdayString } from '../src/js/utils.js';
 import { previewImportJSON } from '../src/js/export.js';
 import { computeMonthlyStats } from '../src/js/charts.js';
 
@@ -19,10 +19,19 @@ console.log('🧪 Starting Automated Tests...\n');
 // 1. Validation Tests
 console.log('▶ Testing Expense Validation:');
 {
-  const valid = validateExpense({ amount: '120.50', category: 'Food', date: '2026-09-11', note: 'Coffee' });
+  const valid = validateExpense({ amount: '120.505', category: 'Food', date: '2026-09-11', note: 'Coffee\x00' });
   assert.strictEqual(valid.isValid, true);
-  assert.strictEqual(valid.values.amount, 120.50);
+  assert.strictEqual(valid.values.amount, 120.51); // 2-decimal rounded
   assert.strictEqual(valid.values.category, 'Food');
+  assert.strictEqual(valid.values.note, 'Coffee'); // Control char removed
+
+  const invalidYearPast = validateExpense({ amount: 50, category: 'Food', date: '1960-01-01' });
+  assert.strictEqual(invalidYearPast.isValid, false);
+  assert.ok(invalidYearPast.errors.date);
+
+  const invalidYearFuture = validateExpense({ amount: 50, category: 'Food', date: '2150-01-01' });
+  assert.strictEqual(invalidYearFuture.isValid, false);
+  assert.ok(invalidYearFuture.errors.date);
 
   const zeroAmt = validateExpense({ amount: 0, category: 'Food', date: '2026-09-11' });
   assert.strictEqual(zeroAmt.isValid, false);
@@ -86,6 +95,12 @@ console.log('▶ Testing Schema Sanitization and Legacy Transformation:');
   assert.strictEqual(envelope.expenses[1].amount, 1200);
   assert.ok(envelope.categories.includes('Food'));
   assert.ok(envelope.settings.currencySymbol);
+  assert.strictEqual(envelope.settings.monthlyBudget, 0);
+
+  const envelopeWithBudget = sanitizeEnvelope({
+    settings: { monthlyBudget: 5000 },
+  });
+  assert.strictEqual(envelopeWithBudget.settings.monthlyBudget, 5000);
 
   console.log('  ✓ Non-destructive envelope sanitization passed');
 }
@@ -153,6 +168,7 @@ console.log('▶ Testing Formatting Utils:');
   assert.strictEqual(formatCurrency(1500.5, '$'), '$1,500.5');
   assert.ok(formatDate('2026-09-11').includes('2026'));
   assert.ok(generateId().startsWith('exp_'));
+  assert.ok(/^\d{4}-\d{2}-\d{2}$/.test(getYesterdayString()));
 
   console.log('  ✓ Formatting utils passed');
 }

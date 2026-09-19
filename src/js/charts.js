@@ -1,39 +1,23 @@
-/**
- * Charts and Analytics Module using Chart.js
- */
-
+import Chart from 'chart.js/auto';
 import { formatCurrency } from './utils.js';
 
 let categoryChartInstance = null;
 let trendChartInstance = null;
 
-// Muted harmonious palette for minimal dark theme
-const MINIMAL_DARK_COLORS = [
+// Curated luminous palette for charts
+export const MODERN_CHART_COLORS = [
   '#6366f1', // Indigo
-  '#38bdf8', // Sky
-  '#34d399', // Emerald
+  '#06b6d4', // Cyan
+  '#10b981', // Emerald
   '#f59e0b', // Amber
-  '#f43f5e', // Rose
-  '#a855f7', // Purple
-  '#14b8a6', // Teal
   '#ec4899', // Pink
-  '#84cc16', // Lime
-  '#94a3b8', // Slate
+  '#8b5cf6', // Violet
+  '#14b8a6', // Teal
+  '#f43f5e', // Rose
+  '#3b82f6', // Blue
+  '#eab308', // Yellow
 ];
-
-/**
- * Helper to dynamically load Chart.js if not available globally
- */
-async function getChartConstructor() {
-  if (window.Chart) return window.Chart;
-  try {
-    const chartModule = await import('chart.js/auto');
-    return chartModule.default || chartModule.Chart;
-  } catch (err) {
-    console.warn('Could not import chart.js/auto directly:', err);
-    return window.Chart || null;
-  }
-}
+const MINIMAL_DARK_COLORS = MODERN_CHART_COLORS;
 
 /**
  * Compute monthly comparison statistics
@@ -103,11 +87,8 @@ export function computeMonthlyStats(expenses) {
 /**
  * Render Category Breakdown Donut Chart
  */
-export async function renderCategoryChart(canvasElement, expenses, currencySymbol = '₹') {
-  if (!canvasElement) return;
-
-  const Chart = await getChartConstructor();
-  if (!Chart) return;
+export function renderCategoryChart(canvasElement, expenses, currencySymbol = '₹') {
+  if (!canvasElement || !Chart) return;
 
   // Aggregate by category
   const categoryTotals = {};
@@ -131,8 +112,12 @@ export async function renderCategoryChart(canvasElement, expenses, currencySymbo
     return;
   }
 
-  const textColor = '#a1a1aa';
-  const borderColor = '#18181b';
+  const isLight = document.documentElement.getAttribute('data-theme') === 'light' ||
+    (document.documentElement.getAttribute('data-theme') === 'system' && window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches);
+  const textColor = isLight ? '#64748b' : '#94a3b8';
+  const borderColor = isLight ? '#ffffff' : '#151821';
+  const tooltipBg = isLight ? 'rgba(15, 23, 42, 0.92)' : 'rgba(15, 23, 42, 0.95)';
+  const tooltipBorder = isLight ? 'rgba(0, 0, 0, 0.12)' : 'rgba(255, 255, 255, 0.12)';
 
   categoryChartInstance = new Chart(canvasElement, {
     type: 'doughnut',
@@ -141,27 +126,41 @@ export async function renderCategoryChart(canvasElement, expenses, currencySymbo
       datasets: [
         {
           data,
-          backgroundColor: MINIMAL_DARK_COLORS.slice(0, labels.length),
+          backgroundColor: MODERN_CHART_COLORS.slice(0, labels.length),
           borderWidth: 2,
           borderColor: borderColor,
-          hoverOffset: 4,
+          hoverOffset: 6,
         },
       ],
     },
     options: {
       responsive: true,
       maintainAspectRatio: false,
+      resizeDelay: 50,
+      layout: {
+        padding: { top: 4, bottom: 4, left: 4, right: 4 }
+      },
       plugins: {
         legend: {
           position: 'bottom',
           labels: {
             color: textColor,
-            font: { family: "'Inter', sans-serif", size: 11 },
-            boxWidth: 12,
-            padding: 12,
+            font: { family: "'Inter', sans-serif", size: 10 },
+            boxWidth: 8,
+            boxHeight: 8,
+            padding: 8,
+            usePointStyle: true,
           },
         },
         tooltip: {
+          backgroundColor: tooltipBg,
+          titleColor: '#f8fafc',
+          bodyColor: '#cbd5e1',
+          borderColor: tooltipBorder,
+          borderWidth: 1,
+          padding: 8,
+          cornerRadius: 6,
+          boxPadding: 4,
           callbacks: {
             label: function (context) {
               const val = context.parsed || 0;
@@ -172,19 +171,16 @@ export async function renderCategoryChart(canvasElement, expenses, currencySymbo
           },
         },
       },
-      cutout: '62%',
+      cutout: '70%',
     },
   });
 }
 
 /**
- * Render Spending-Over-Time Bar Chart (Last 6 Months or Current Month by Week)
+ * Render Spending-Over-Time Bar Chart (Last 6 Months)
  */
-export async function renderTrendChart(canvasElement, expenses, currencySymbol = '₹') {
-  if (!canvasElement) return;
-
-  const Chart = await getChartConstructor();
-  if (!Chart) return;
+export function renderTrendChart(canvasElement, expenses, currencySymbol = '₹') {
+  if (!canvasElement || !Chart) return;
 
   // Group by last 6 months
   const monthsMap = {};
@@ -215,8 +211,14 @@ export async function renderTrendChart(canvasElement, expenses, currencySymbol =
     trendChartInstance = null;
   }
 
-  const textColor = '#a1a1aa';
-  const gridColor = 'rgba(255, 255, 255, 0.06)';
+  const isLight = document.documentElement.getAttribute('data-theme') === 'light' ||
+    (document.documentElement.getAttribute('data-theme') === 'system' && window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches);
+  const textColor = isLight ? '#64748b' : '#94a3b8';
+  const gridColor = isLight ? 'rgba(0, 0, 0, 0.06)' : 'rgba(255, 255, 255, 0.06)';
+  const barColor = isLight ? '#4f46e5' : '#6366f1';
+  const barHoverColor = isLight ? '#4338ca' : '#818cf8';
+  const tooltipBg = isLight ? 'rgba(15, 23, 42, 0.92)' : 'rgba(15, 23, 42, 0.95)';
+  const tooltipBorder = isLight ? 'rgba(0, 0, 0, 0.12)' : 'rgba(255, 255, 255, 0.12)';
 
   trendChartInstance = new Chart(canvasElement, {
     type: 'bar',
@@ -226,19 +228,31 @@ export async function renderTrendChart(canvasElement, expenses, currencySymbol =
         {
           label: 'Total Spending',
           data,
-          backgroundColor: '#6366f1',
-          hoverBackgroundColor: '#4f46e5',
-          borderRadius: 4,
+          backgroundColor: barColor,
+          hoverBackgroundColor: barHoverColor,
+          borderRadius: { topLeft: 4, topRight: 4, bottomLeft: 0, bottomRight: 0 },
           borderSkipped: false,
+          maxBarThickness: 28,
         },
       ],
     },
     options: {
       responsive: true,
       maintainAspectRatio: false,
+      resizeDelay: 50,
+      layout: {
+        padding: { left: 0, right: 6, top: 4, bottom: 0 }
+      },
       plugins: {
         legend: { display: false },
         tooltip: {
+          backgroundColor: tooltipBg,
+          titleColor: '#f8fafc',
+          bodyColor: '#cbd5e1',
+          borderColor: tooltipBorder,
+          borderWidth: 1,
+          padding: 8,
+          cornerRadius: 6,
           callbacks: {
             label: function (context) {
               return ` Spending: ${formatCurrency(context.parsed.y || 0, currencySymbol)}`;
@@ -249,14 +263,20 @@ export async function renderTrendChart(canvasElement, expenses, currencySymbol =
       scales: {
         x: {
           grid: { display: false },
-          ticks: { color: textColor, font: { family: "'Inter', sans-serif", size: 11 } },
+          ticks: {
+            color: textColor,
+            font: { family: "'Inter', sans-serif", size: 10 },
+            maxRotation: 0,
+            autoSkip: true,
+          },
         },
         y: {
           grid: { color: gridColor },
           ticks: {
             color: textColor,
-            font: { family: "'Inter', sans-serif", size: 10 },
-            callback: (val) => `${currencySymbol}${val}`,
+            font: { family: "'Inter', sans-serif", size: 9 },
+            maxTicksLimit: 5,
+            callback: (val) => `${currencySymbol}${val >= 1000 ? (val / 1000) + 'k' : val}`,
           },
           beginAtZero: true,
         },

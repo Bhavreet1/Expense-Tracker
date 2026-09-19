@@ -11,11 +11,18 @@ html {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-rendering: optimizeLegibility;
+  overflow-x: hidden;
+  -webkit-tap-highlight-color: transparent;
 }
 
 body {
   min-height: 100vh;
   line-height: 1.5;
+  overflow-x: hidden;
+  width: 100%;
+  max-width: 100vw;
+  box-sizing: border-box;
+  padding-bottom: max(80px, calc(60px + env(safe-area-inset-bottom)));
 }
 
 img,
@@ -43,4 +50,39 @@ button {
 a {
   color: inherit;
   text-decoration: none;
+}
+
+// Accessible Skip Link
+.skip-link {
+  position: absolute;
+  top: -100px;
+  left: 1rem;
+  background: #6366f1;
+  color: #ffffff;
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  font-weight: 600;
+  font-size: 0.875rem;
+  z-index: 9999;
+  text-decoration: none;
+  transition: top 0.15s ease;
+
+  &:focus {
+    top: 1rem;
+    outline: 2px solid #ffffff;
+    outline-offset: 2px;
+  }
+}
+
+// Visually Hidden (Screen Reader Only)
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
 }

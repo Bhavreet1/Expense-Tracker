@@ -13,35 +13,37 @@
  */
 export function validateExpense({ amount, category, date, note = '' }) {
   const errors = {};
-  const parsedAmount = typeof amount === 'number' ? amount : parseFloat(amount);
+  const rawAmount = typeof amount === 'number' ? amount : parseFloat(amount);
 
   // Amount validation
-  if (isNaN(parsedAmount)) {
+  if (isNaN(rawAmount)) {
     errors.amount = 'Amount is required and must be a number';
-  } else if (parsedAmount <= 0) {
+  } else if (rawAmount <= 0) {
     errors.amount = 'Amount must be greater than 0';
-  } else if (parsedAmount > 1000000000) {
+  } else if (rawAmount > 1000000000) {
     errors.amount = 'Amount is unrealistically large';
   }
+  const parsedAmount = Math.round(rawAmount * 100) / 100;
 
   // Category validation
   if (!category || typeof category !== 'string' || category.trim() === '') {
     errors.category = 'Please select a valid category';
   }
 
-  // Date validation
+  // Date validation with century boundaries
   if (!date || typeof date !== 'string' || date.trim() === '') {
     errors.date = 'Date is required';
   } else {
     const parsedDate = new Date(date);
-    if (isNaN(parsedDate.getTime())) {
-      errors.date = 'Please enter a valid date';
+    const year = parsedDate.getFullYear();
+    if (isNaN(parsedDate.getTime()) || year < 1970 || year > 2100) {
+      errors.date = 'Please enter a valid date between 1970 and 2100';
     }
   }
 
-  // Note validation (optional, max 150 chars)
-  const trimmedNote = (note || '').trim();
-  if (trimmedNote.length > 150) {
+  // Note validation (optional, max 150 chars, strip invisible control characters)
+  const sanitizedNote = (note || '').replace(/[\x00-\x1F\x7F]/g, '').trim();
+  if (sanitizedNote.length > 150) {
     errors.note = 'Note must be 150 characters or less';
   }
 
@@ -52,7 +54,7 @@ export function validateExpense({ amount, category, date, note = '' }) {
       amount: parsedAmount,
       category: category ? category.trim() : '',
       date: date ? date.trim() : '',
-      note: trimmedNote,
+      note: sanitizedNote,
     },
   };
 }

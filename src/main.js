@@ -11,9 +11,13 @@ state.init();
 
 // Initialize UI controller
 const ui = new UIRenderer(state);
-document.addEventListener('DOMContentLoaded', () => {
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', () => {
+    ui.init();
+  });
+} else {
   ui.init();
-});
+}
 
 // Register PWA service worker if supported
 if ('serviceWorker' in navigator && window.location.protocol.startsWith('http')) {

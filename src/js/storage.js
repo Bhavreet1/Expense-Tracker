@@ -33,6 +33,7 @@ export const DEFAULT_SETTINGS = {
   currencyCode: 'INR',
   theme: 'dark', // 'light' | 'dark' | 'system'
   dateFormat: 'YYYY-MM-DD',
+  monthlyBudget: 0, // 0 indicates no budget limit configured
 };
 
 /**

@@ -2,27 +2,13 @@
  * UI Rendering and DOM Interaction Controller
  */
 
-import { formatCurrency, formatDate, escapeHTML, truncate } from './utils.js';
+import { formatCurrency, formatDate, escapeHTML, truncate, getTodayString, getYesterdayString } from './utils.js';
 import { validateExpense, validateCategoryName } from './validation.js';
-import { computeMonthlyStats, renderCategoryChart, renderTrendChart } from './charts.js';
+import { computeMonthlyStats, renderCategoryChart, renderTrendChart, MODERN_CHART_COLORS } from './charts.js';
 import { exportToJSON, exportToCSV, previewImportJSON } from './export.js';
+import { ICONS, getCategoryIcon } from './icons.js';
 
-// SVG Icons
-export const ICONS = {
-  edit: `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/></svg>`,
-  delete: `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/><line x1="10" x2="10" y1="11" y2="17"/><line x1="14" x2="14" y1="11" y2="17"/></svg>`,
-  sortAsc: `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m18 15-6-6-6 6"/></svg>`,
-  sortDesc: `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>`,
-  sortNone: `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" opacity="0.4"><path d="m7 15 5 5 5-5"/><path d="m7 9 5-5 5 5"/></svg>`,
-  search: `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>`,
-  settings: `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg>`,
-  plus: `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M12 5v14"/></svg>`,
-  check: `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>`,
-  close: `<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>`,
-  sparkle: `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/></svg>`,
-  download: `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/></svg>`,
-  upload: `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" x2="12" y1="3" y2="15"/></svg>`,
-};
+export { ICONS, getCategoryIcon };
 
 /**
  * Toast notification manager
@@ -52,6 +38,16 @@ export class ToastManager {
     const toast = document.createElement('div');
     toast.className = `toast toast--${type}`;
     toast.setAttribute('role', 'status');
+
+    let iconSvg = ICONS.toastInfo;
+    if (type === 'success') iconSvg = ICONS.toastSuccess;
+    if (type === 'error') iconSvg = ICONS.toastError;
+    if (type === 'warning') iconSvg = ICONS.toastWarning;
+
+    const iconSpan = document.createElement('span');
+    iconSpan.className = 'toast__icon';
+    iconSpan.innerHTML = iconSvg;
+    toast.appendChild(iconSpan);
 
     const msgSpan = document.createElement('span');
     msgSpan.className = 'toast__message';
@@ -123,13 +119,18 @@ export class UIRenderer {
    */
   init() {
     this.bindAddForm();
+    this.bindQuickCategoryChips();
+    this.bindDatePresets();
+    this.bindBudgetControls();
     this.bindSearchAndFilters();
     this.bindTableSorting();
     this.bindEditModal();
     this.bindDeleteModal();
     this.bindImportModal();
     this.bindSettingsModal();
+    this.bindShortcutsModal();
     this.bindKeyboardShortcuts();
+    this.bindThemeToggle();
     this.applyTheme(this.state.getState().settings.theme);
 
     // Subscribe to state changes to re-render UI
@@ -142,6 +143,74 @@ export class UIRenderer {
   }
 
   /**
+   * Accessible Modal Helpers (Focus trap, Inert background, Focus return)
+   */
+  openModal(modalId, triggerElement = null) {
+    const modal = document.getElementById(modalId);
+    if (!modal) return;
+
+    modal._triggerElement = triggerElement || document.activeElement;
+    modal.classList.add('modal--open');
+
+    // Invert inert on background landmarks for screen readers
+    document.querySelector('.app-header')?.setAttribute('inert', '');
+    document.getElementById('main-content')?.setAttribute('inert', '');
+
+    // Trap focus & focus first interactive element
+    const focusables = modal.querySelectorAll(
+      'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+    );
+    if (focusables.length > 0) {
+      focusables[0].focus();
+    }
+
+    modal._keyHandler = (e) => {
+      if (e.key === 'Escape') {
+        this.closeModal(modalId);
+        return;
+      }
+      if (e.key === 'Tab') {
+        const items = Array.from(
+          modal.querySelectorAll(
+            'button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'
+          )
+        );
+        if (!items.length) return;
+        const first = items[0];
+        const last = items[items.length - 1];
+
+        if (e.shiftKey && document.activeElement === first) {
+          e.preventDefault();
+          last.focus();
+        } else if (!e.shiftKey && document.activeElement === last) {
+          e.preventDefault();
+          first.focus();
+        }
+      }
+    };
+    window.addEventListener('keydown', modal._keyHandler);
+  }
+
+  closeModal(modalId) {
+    const modal = document.getElementById(modalId);
+    if (!modal || !modal.classList.contains('modal--open')) return;
+
+    modal.classList.remove('modal--open');
+    document.querySelector('.app-header')?.removeAttribute('inert');
+    document.getElementById('main-content')?.removeAttribute('inert');
+
+    if (modal._keyHandler) {
+      window.removeEventListener('keydown', modal._keyHandler);
+      modal._keyHandler = null;
+    }
+
+    if (modal._triggerElement && typeof modal._triggerElement.focus === 'function') {
+      modal._triggerElement.focus();
+      modal._triggerElement = null;
+    }
+  }
+
+  /**
    * Main render loop
    */
   render(snapshot) {
@@ -149,6 +218,8 @@ export class UIRenderer {
 
     this.renderCategoryOptions(categories);
     this.renderExpenseTable(filteredExpenses, settings.currencySymbol, hasActiveFilters, expenses.length === 0);
+    this.renderExecutiveStats(snapshot);
+    this.renderBudgetProgress(snapshot);
     this.renderTotals(totalAllAmount, totalFilteredAmount, settings.currencySymbol, expenses.length, filteredExpenses.length);
     this.renderMonthlySummary(expenses, settings.currencySymbol);
     this.renderSortHeaders(sort);
@@ -210,13 +281,13 @@ export class UIRenderer {
         emptyStateContainer.style.display = 'flex';
         if (isCompletelyEmpty) {
           emptyStateContainer.innerHTML = `
-            <div class="empty-state__icon">✨</div>
+            <div class="empty-state__icon" aria-hidden="true">${ICONS.sparkleEmpty}</div>
             <h3>No expenses logged yet</h3>
-            <p>Add your first expense on the right to start tracking your spending.</p>
+            <p>Add your first expense on the right or tap a quick category chip to start tracking.</p>
           `;
         } else {
           emptyStateContainer.innerHTML = `
-            <div class="empty-state__icon">🔍</div>
+            <div class="empty-state__icon" aria-hidden="true">${ICONS.searchEmpty}</div>
             <h3>No matching expenses found</h3>
             <p>Try adjusting your search query or clearing active filters.</p>
             <button class="btn btn--outline btn--sm" id="btn-reset-empty-filters">Clear all filters</button>
@@ -233,16 +304,24 @@ export class UIRenderer {
     if (emptyStateContainer) emptyStateContainer.style.display = 'none';
     if (tableElement) tableElement.style.display = 'table';
 
+    const categoriesList = this.state.getState().categories || [];
+
     tbody.innerHTML = expenses
       .map((exp) => {
         const hasNote = Boolean(exp.note && exp.note.trim());
+        const catIdx = Math.max(0, categoriesList.indexOf(exp.category));
+        const catColor = MODERN_CHART_COLORS[catIdx % MODERN_CHART_COLORS.length];
+
         return `
           <tr data-id="${exp.id}">
             <td class="col-amount">
               <span class="amount-value">${formatCurrency(exp.amount, currencySymbol)}</span>
             </td>
             <td class="col-category">
-              <span class="category-badge">${escapeHTML(exp.category)}</span>
+              <span class="category-badge">
+                <span class="category-icon" style="color: ${catColor};">${getCategoryIcon(exp.category, 13)}</span>
+                <span class="category-name">${escapeHTML(exp.category)}</span>
+              </span>
             </td>
             <td class="col-date">
               <span class="date-value">${formatDate(exp.date)}</span>
@@ -256,10 +335,10 @@ export class UIRenderer {
             </td>
             <td class="col-actions">
               <div class="table-actions">
-                <button class="action-btn action-btn--edit" data-action="edit" data-id="${exp.id}" aria-label="Edit expense">
+                <button class="action-btn action-btn--edit" data-action="edit" data-id="${exp.id}" aria-label="Edit expense: ${escapeHTML(exp.category)}, ${formatCurrency(exp.amount, currencySymbol)}">
                   ${ICONS.edit}
                 </button>
-                <button class="action-btn action-btn--delete" data-action="delete" data-id="${exp.id}" aria-label="Delete expense">
+                <button class="action-btn action-btn--delete" data-action="delete" data-id="${exp.id}" aria-label="Delete expense: ${escapeHTML(exp.category)}, ${formatCurrency(exp.amount, currencySymbol)}">
                   ${ICONS.delete}
                 </button>
               </div>
@@ -275,18 +354,160 @@ export class UIRenderer {
         e.stopPropagation();
         const action = btn.getAttribute('data-action');
         const id = btn.getAttribute('data-id');
-        if (action === 'edit') this.openEditModal(id);
-        if (action === 'delete') this.openDeleteModal(id);
+        if (action === 'edit') this.openEditModal(id, btn);
+        if (action === 'delete') this.openDeleteModal(id, btn);
       };
     });
   }
 
   /**
-   * Render total summary numbers
+   * Render Top Executive Stats Cards
+   */
+  renderExecutiveStats(snapshot) {
+    const { expenses, settings } = snapshot;
+    const symbol = settings.currencySymbol || '₹';
+    const totalAll = expenses.reduce((sum, exp) => sum + (exp.amount || 0), 0);
+    const stats = computeMonthlyStats(expenses);
+    const now = new Date();
+    const currentDay = now.getDate();
+    const daysInMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
+
+    // 1. Total Spent
+    const totalCardVal = document.getElementById('card-stat-total');
+    const totalCardSub = document.getElementById('card-stat-total-sub');
+    if (totalCardVal) totalCardVal.textContent = formatCurrency(totalAll, symbol);
+    if (totalCardSub) totalCardSub.textContent = `${expenses.length} ${expenses.length === 1 ? 'transaction' : 'transactions'}`;
+
+    // 2. This Month
+    const monthCardVal = document.getElementById('card-stat-month');
+    const monthCardSub = document.getElementById('card-stat-month-sub');
+    const monthCardTitle = document.getElementById('card-stat-month-title');
+    if (monthCardTitle) monthCardTitle.textContent = stats.currentMonthName;
+    if (monthCardVal) monthCardVal.textContent = formatCurrency(stats.currentMonthTotal, symbol);
+    if (monthCardSub) {
+      if (stats.percentChange === null) {
+        monthCardSub.textContent = 'No prior data';
+      } else {
+        const sign = stats.percentChange > 0 ? '+' : '';
+        monthCardSub.textContent = `${sign}${stats.percentChange}% vs last month`;
+      }
+    }
+
+    // 3. Monthly Budget & Remaining
+    const budgetRemainingVal = document.getElementById('card-stat-remaining');
+    const budgetRemainingSub = document.getElementById('card-stat-remaining-sub');
+    const budget = settings.monthlyBudget || 0;
+    if (budgetRemainingVal && budgetRemainingSub) {
+      if (budget > 0) {
+        const remaining = budget - stats.currentMonthTotal;
+        if (remaining >= 0) {
+          budgetRemainingVal.textContent = formatCurrency(remaining, symbol);
+          budgetRemainingSub.textContent = `of ${formatCurrency(budget, symbol)} budget`;
+        } else {
+          budgetRemainingVal.textContent = `-${formatCurrency(Math.abs(remaining), symbol)}`;
+          budgetRemainingSub.textContent = `Over limit by ${formatCurrency(Math.abs(remaining), symbol)}`;
+        }
+      } else {
+        budgetRemainingVal.textContent = 'Not set';
+        budgetRemainingSub.textContent = 'Tap to set monthly budget';
+      }
+    }
+
+    // 4. Daily Average this month
+    const dailyVal = document.getElementById('card-stat-daily');
+    const dailySub = document.getElementById('card-stat-daily-sub');
+    if (dailyVal) {
+      const avg = currentDay > 0 ? Math.round(stats.currentMonthTotal / currentDay) : 0;
+      dailyVal.textContent = `${formatCurrency(avg, symbol)}/day`;
+    }
+    if (dailySub) {
+      const avg = currentDay > 0 ? stats.currentMonthTotal / currentDay : 0;
+      const projected = Math.round(avg * daysInMonth);
+      dailySub.textContent = `Projected: ${formatCurrency(projected, symbol)}`;
+    }
+  }
+
+  /**
+   * Render Monthly Budget Progress Widget
+   */
+  renderBudgetProgress(snapshot) {
+    const { expenses, settings } = snapshot;
+    const symbol = settings.currencySymbol || '₹';
+    const stats = computeMonthlyStats(expenses);
+    const budget = settings.monthlyBudget || 0;
+    const spent = stats.currentMonthTotal;
+
+    const spentEl = document.getElementById('budget-spent-display');
+    const targetEl = document.getElementById('budget-target-display');
+    const fillEl = document.getElementById('budget-progress-fill');
+    const badgeEl = document.getElementById('budget-status-badge');
+    const allowanceEl = document.getElementById('budget-daily-allowance');
+
+    if (spentEl) spentEl.textContent = formatCurrency(spent, symbol);
+
+    if (!budget || budget <= 0) {
+      if (targetEl) targetEl.textContent = '/ No limit';
+      if (fillEl) {
+        fillEl.style.width = '0%';
+        fillEl.className = 'budget-progress-fill';
+      }
+      if (badgeEl) {
+        badgeEl.textContent = 'No budget set';
+        badgeEl.className = 'budget-badge budget-badge--neutral';
+      }
+      if (allowanceEl) allowanceEl.textContent = 'Click Edit to set target';
+      return;
+    }
+
+    if (targetEl) targetEl.textContent = `/ ${formatCurrency(budget, symbol)}`;
+
+    const pct = Math.round((spent / budget) * 100);
+    const remaining = Math.max(0, budget - spent);
+
+    if (fillEl) {
+      fillEl.style.width = `${Math.min(100, pct)}%`;
+      if (pct > 90) {
+        fillEl.className = 'budget-progress-fill budget-progress-fill--danger';
+      } else if (pct >= 75) {
+        fillEl.className = 'budget-progress-fill budget-progress-fill--warning';
+      } else {
+        fillEl.className = 'budget-progress-fill';
+      }
+    }
+
+    if (badgeEl) {
+      if (spent > budget) {
+        badgeEl.textContent = `Over budget by ${formatCurrency(spent - budget, symbol)}`;
+        badgeEl.className = 'budget-badge budget-badge--danger';
+      } else if (pct >= 75) {
+        badgeEl.textContent = `Near Limit (${pct}%)`;
+        badgeEl.className = 'budget-badge budget-badge--caution';
+      } else {
+        badgeEl.textContent = `On Track (${pct}%)`;
+        badgeEl.className = 'budget-badge budget-badge--safe';
+      }
+    }
+
+    if (allowanceEl) {
+      const now = new Date();
+      const daysInMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
+      const daysRemaining = Math.max(1, daysInMonth - now.getDate());
+      if (remaining > 0) {
+        const dailyAllowance = Math.round(remaining / daysRemaining);
+        allowanceEl.textContent = `${formatCurrency(dailyAllowance, symbol)}/day left (${daysRemaining}d)`;
+      } else {
+        allowanceEl.textContent = '0 remaining';
+      }
+    }
+  }
+
+  /**
+   * Render total summary numbers and announce to live region
    */
   renderTotals(totalAll, totalFiltered, currencySymbol, totalCount, filteredCount) {
     const totalDisplay = document.getElementById('total-amount-display');
     const filteredSubtitle = document.getElementById('total-amount-subtitle');
+    const a11yStatus = document.getElementById('a11y-status');
 
     if (totalDisplay) {
       totalDisplay.textContent = formatCurrency(totalFiltered, currencySymbol);
@@ -298,6 +519,14 @@ export class UIRenderer {
       } else {
         filteredSubtitle.textContent = `${totalCount} ${totalCount === 1 ? 'expense' : 'expenses'} recorded`;
       }
+    }
+
+    // Dynamic Accessibility Live Region announcement
+    if (a11yStatus) {
+      a11yStatus.textContent =
+        filteredCount === 0
+          ? 'No matching expenses found.'
+          : `Showing ${filteredCount} of ${totalCount} expenses. Total: ${formatCurrency(totalFiltered, currencySymbol)}.`;
     }
   }
 
@@ -350,6 +579,11 @@ export class UIRenderer {
         iconSpan.innerHTML = ICONS.sortNone;
       }
     });
+
+    const filterSort = document.getElementById('filter-sort');
+    if (filterSort) {
+      filterSort.value = `${sort.field}-${sort.order}`;
+    }
   }
 
   /**
@@ -460,8 +694,7 @@ export class UIRenderer {
 
     // Set default date to today
     if (dateInput && !dateInput.value) {
-      const today = new Date().toISOString().split('T')[0];
-      dateInput.value = today;
+      dateInput.value = getTodayString();
     }
 
     if (!form) return;
@@ -484,17 +717,180 @@ export class UIRenderer {
       }
 
       const added = this.state.addExpense(validation.values);
+      const symbol = this.state.getState().settings.currencySymbol || '₹';
       toast.show({
-        message: `Added ₹${added.amount} (${added.category})`,
+        message: `Added ${formatCurrency(added.amount, symbol)} (${added.category})`,
         type: 'success',
       });
 
       // Reset fields
       if (amountInput) amountInput.value = '';
       if (noteInput) noteInput.value = '';
-      if (dateInput) dateInput.value = new Date().toISOString().split('T')[0];
+      if (dateInput) dateInput.value = getTodayString();
+
+      // Reset chip states
+      document.querySelectorAll('#quick-category-pills .category-chip-btn').forEach((b) => b.classList.remove('is-active'));
+      document.querySelectorAll('#date-presets .date-preset-btn').forEach((b) => {
+        b.classList.toggle('is-active', b.dataset.preset === 'today');
+      });
+
       if (amountInput) amountInput.focus();
     };
+
+    // Mobile FAB and Quick Jump buttons
+    const jumpToAdd = () => {
+      form.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      if (amountInput) {
+        setTimeout(() => {
+          amountInput.focus();
+          amountInput.select();
+        }, 300);
+      }
+    };
+
+    const fabBtn = document.getElementById('fab-add-expense');
+    if (fabBtn) fabBtn.onclick = jumpToAdd;
+
+    const jumpBtn = document.getElementById('btn-jump-to-add');
+    if (jumpBtn) jumpBtn.onclick = jumpToAdd;
+  }
+
+  /**
+   * Bind Quick 1-Tap Category Selection Chips
+   */
+  bindQuickCategoryChips() {
+    const pillsContainer = document.getElementById('quick-category-pills');
+    const categorySelect = document.getElementById('category');
+    const amountInput = document.getElementById('amount');
+    if (!pillsContainer || !categorySelect) return;
+
+    pillsContainer.addEventListener('click', (e) => {
+      const btn = e.target.closest('.category-chip-btn');
+      if (!btn) return;
+      const cat = btn.dataset.category;
+      if (!cat) return;
+
+      // Update select
+      categorySelect.value = cat;
+
+      // Update active styling
+      pillsContainer.querySelectorAll('.category-chip-btn').forEach((b) => b.classList.remove('is-active'));
+      btn.classList.add('is-active');
+
+      // Focus and select amount input for seamless fast typing
+      if (amountInput) {
+        amountInput.focus();
+        amountInput.select();
+      }
+    });
+
+    categorySelect.addEventListener('change', () => {
+      const val = categorySelect.value;
+      pillsContainer.querySelectorAll('.category-chip-btn').forEach((b) => {
+        b.classList.toggle('is-active', b.dataset.category === val);
+      });
+    });
+  }
+
+  /**
+   * Bind Date Presets (Today, Yesterday)
+   */
+  bindDatePresets() {
+    const presetsContainer = document.getElementById('date-presets');
+    const dateInput = document.getElementById('date');
+    if (!presetsContainer || !dateInput) return;
+
+    presetsContainer.addEventListener('click', (e) => {
+      const btn = e.target.closest('.date-preset-btn');
+      if (!btn) return;
+      const preset = btn.dataset.preset;
+
+      if (preset === 'today') {
+        dateInput.value = getTodayString();
+      } else if (preset === 'yesterday') {
+        dateInput.value = getYesterdayString();
+      }
+
+      presetsContainer.querySelectorAll('.date-preset-btn').forEach((b) => b.classList.remove('is-active'));
+      btn.classList.add('is-active');
+    });
+
+    dateInput.addEventListener('change', () => {
+      const val = dateInput.value;
+      const today = getTodayString();
+      const yesterday = getYesterdayString();
+      presetsContainer.querySelectorAll('.date-preset-btn').forEach((b) => {
+        if (b.dataset.preset === 'today') b.classList.toggle('is-active', val === today);
+        if (b.dataset.preset === 'yesterday') b.classList.toggle('is-active', val === yesterday);
+      });
+    });
+  }
+
+  /**
+   * Bind Shortcuts Modal
+   */
+  bindShortcutsModal() {
+    const openBtn = document.getElementById('btn-open-shortcuts');
+    const closeBtn = document.getElementById('btn-close-shortcuts-modal');
+    const footerCloseBtn = document.getElementById('btn-close-shortcuts');
+    const modal = document.getElementById('shortcuts-modal');
+
+    if (openBtn) {
+      openBtn.onclick = () => this.openModal('shortcuts-modal', openBtn);
+    }
+    if (closeBtn) {
+      closeBtn.onclick = () => this.closeModal('shortcuts-modal');
+    }
+    if (footerCloseBtn) {
+      footerCloseBtn.onclick = () => this.closeModal('shortcuts-modal');
+    }
+    if (modal) {
+      modal.onclick = (e) => {
+        if (e.target === modal) this.closeModal('shortcuts-modal');
+      };
+    }
+  }
+
+  /**
+   * Bind Budget Controls
+   */
+  bindBudgetControls() {
+    const editBudgetBtn = document.getElementById('btn-edit-budget');
+    const budgetStatCard = document.getElementById('stat-card-budget-box');
+    const totalStatCard = document.getElementById('stat-card-total-box');
+    const budgetInput = document.getElementById('setting-budget');
+    const searchInput = document.getElementById('search-input');
+
+    const openBudgetEditor = (triggerEl) => {
+      this.openModal('settings-modal', triggerEl || editBudgetBtn);
+      if (budgetInput) {
+        setTimeout(() => {
+          budgetInput.focus();
+          budgetInput.select();
+        }, 100);
+      }
+    };
+
+    if (editBudgetBtn) {
+      editBudgetBtn.onclick = () => openBudgetEditor(editBudgetBtn);
+    }
+    if (budgetStatCard) {
+      budgetStatCard.onclick = () => openBudgetEditor(budgetStatCard);
+    }
+    if (totalStatCard) {
+      totalStatCard.onclick = () => {
+        const tableCard = document.getElementById('main-content');
+        if (tableCard) {
+          tableCard.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+        if (searchInput) {
+          setTimeout(() => {
+            searchInput.focus();
+            searchInput.select();
+          }, 300);
+        }
+      };
+    }
   }
 
   /**
@@ -536,6 +932,16 @@ export class UIRenderer {
       };
     }
 
+    const filterSort = document.getElementById('filter-sort');
+    if (filterSort) {
+      filterSort.onchange = () => {
+        const [field, order] = filterSort.value.split('-');
+        if (field && order) {
+          this.state.setSort(field, order);
+        }
+      };
+    }
+
     if (toggleFilterBtn && filtersPanel) {
       toggleFilterBtn.onclick = () => {
         const isHidden = filtersPanel.classList.toggle('is-collapsed');
@@ -545,14 +951,25 @@ export class UIRenderer {
   }
 
   /**
-   * Bind Table Header Sorting
+   * Bind Table Header Sorting with Keyboard Navigation
    */
   bindTableSorting() {
     const headers = document.querySelectorAll('th[data-sort]');
     headers.forEach((th) => {
-      th.onclick = () => {
+      th.setAttribute('tabindex', '0');
+      th.setAttribute('role', 'columnheader');
+
+      const doSort = () => {
         const field = th.getAttribute('data-sort');
         if (field) this.state.setSort(field);
+      };
+
+      th.onclick = doSort;
+      th.onkeydown = (e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          doSort();
+        }
       };
     });
   }
@@ -569,7 +986,7 @@ export class UIRenderer {
     if (!modal || !form) return;
 
     const closeModal = () => {
-      modal.classList.remove('modal--open');
+      this.closeModal('edit-modal');
       this.currentEditId = null;
       this.clearFormErrors(form);
     };
@@ -610,12 +1027,11 @@ export class UIRenderer {
     };
   }
 
-  openEditModal(id) {
+  openEditModal(id, triggerElement = null) {
     const exp = this.state.getState().expenses.find((e) => e.id === id);
     if (!exp) return;
 
     this.currentEditId = id;
-    const modal = document.getElementById('edit-modal');
     const amountInput = document.getElementById('edit-amount');
     const categorySelect = document.getElementById('edit-category');
     const dateInput = document.getElementById('edit-date');
@@ -626,7 +1042,7 @@ export class UIRenderer {
     if (dateInput) dateInput.value = exp.date;
     if (noteInput) noteInput.value = exp.note || '';
 
-    if (modal) modal.classList.add('modal--open');
+    this.openModal('edit-modal', triggerElement);
   }
 
   /**
@@ -641,7 +1057,7 @@ export class UIRenderer {
     if (!modal) return;
 
     const closeModal = () => {
-      modal.classList.remove('modal--open');
+      this.closeModal('delete-modal');
       this.currentDeleteId = null;
     };
 
@@ -660,7 +1076,7 @@ export class UIRenderer {
 
         if (deleted) {
           toast.show({
-            message: `Deleted "${deleted.category}" (${deleted.amount})`,
+            message: `Deleted "${deleted.category}" (${formatCurrency(deleted.amount, this.state.getState().settings.currencySymbol)})`,
             type: 'info',
             duration: 6000,
             actionLabel: 'Undo',
@@ -674,17 +1090,16 @@ export class UIRenderer {
     }
   }
 
-  openDeleteModal(id) {
+  openDeleteModal(id, triggerElement = null) {
     const exp = this.state.getState().expenses.find((e) => e.id === id);
     if (!exp) return;
 
     this.currentDeleteId = id;
-    const modal = document.getElementById('delete-modal');
     const details = document.getElementById('delete-item-preview');
     if (details) {
       details.textContent = `${exp.category} — ${formatCurrency(exp.amount, this.state.getState().settings.currencySymbol)} on ${formatDate(exp.date)}`;
     }
-    if (modal) modal.classList.add('modal--open');
+    this.openModal('delete-modal', triggerElement);
   }
 
   /**
@@ -699,6 +1114,8 @@ export class UIRenderer {
     const currencySelect = document.getElementById('setting-currency');
     // Theme selector
     const themeSelect = document.getElementById('setting-theme');
+    // Monthly budget input
+    const budgetInput = document.getElementById('setting-budget');
 
     // Export Buttons
     const exportJsonBtn = document.getElementById('btn-export-json');
@@ -713,15 +1130,16 @@ export class UIRenderer {
 
     if (!modal) return;
 
-    const closeModal = () => modal.classList.remove('modal--open');
+    const closeModal = () => this.closeModal('settings-modal');
 
     if (openBtn) {
       openBtn.onclick = () => {
         const settings = this.state.getState().settings;
         if (currencySelect) currencySelect.value = settings.currencySymbol;
         if (themeSelect) themeSelect.value = settings.theme;
+        if (budgetInput) budgetInput.value = settings.monthlyBudget ? settings.monthlyBudget : '';
         this.renderCustomCategoryList();
-        modal.classList.add('modal--open');
+        this.openModal('settings-modal', openBtn);
       };
     }
 
@@ -742,6 +1160,19 @@ export class UIRenderer {
         const theme = themeSelect.value;
         this.applyTheme(theme);
         this.state.updateSettings({ theme });
+      };
+    }
+
+    if (budgetInput) {
+      budgetInput.onchange = () => {
+        const budgetVal = parseFloat(budgetInput.value) || 0;
+        this.state.setMonthlyBudget(budgetVal);
+        toast.show({
+          message: budgetVal > 0 
+            ? `Monthly budget set to ${formatCurrency(budgetVal, this.state.getState().settings.currencySymbol)}` 
+            : 'Monthly budget disabled',
+          type: 'success'
+        });
       };
     }
 
@@ -803,6 +1234,7 @@ export class UIRenderer {
       .map(
         (c) => `
       <div class="category-chip">
+        <span class="category-chip__icon" aria-hidden="true">${getCategoryIcon(c, 13)}</span>
         <span>${escapeHTML(c)}</span>
         <button class="category-chip__remove" data-cat="${escapeHTML(c)}" title="Remove category">${ICONS.close}</button>
       </div>
@@ -838,13 +1270,13 @@ export class UIRenderer {
     if (!modal) return;
 
     const closeModal = () => {
-      modal.classList.remove('modal--open');
+      this.closeModal('import-modal');
       this.stagedImportData = null;
       if (fileInput) fileInput.value = '';
       if (previewContainer) previewContainer.style.display = 'none';
     };
 
-    if (openBtn) openBtn.onclick = () => modal.classList.add('modal--open');
+    if (openBtn) openBtn.onclick = () => this.openModal('import-modal', openBtn);
     if (closeBtn) closeBtn.onclick = closeModal;
     modal.onclick = (e) => {
       if (e.target === modal) closeModal();
@@ -897,6 +1329,12 @@ export class UIRenderer {
 
     if (dropzone) {
       dropzone.onclick = () => fileInput?.click();
+      dropzone.onkeydown = (e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          fileInput?.click();
+        }
+      };
       dropzone.ondragover = (e) => {
         e.preventDefault();
         dropzone.classList.add('dropzone--dragover');
@@ -939,15 +1377,91 @@ export class UIRenderer {
   }
 
   /**
-   * Theme Application
+   * Theme Application & Dynamic Color Syncing
    */
   applyTheme(theme) {
-    if (theme === 'light') {
-      document.documentElement.setAttribute('data-theme', 'light');
-    } else {
-      // Force dark mode as primary for this specific UI design
-      document.documentElement.setAttribute('data-theme', 'dark');
+    const validTheme = ['dark', 'light', 'system'].includes(theme) ? theme : 'dark';
+    document.documentElement.setAttribute('data-theme', validTheme);
+
+    // Calculate effective visual mode
+    const isSystem = validTheme === 'system';
+    const systemPrefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+    const effectiveTheme = isSystem ? (systemPrefersDark ? 'dark' : 'light') : validTheme;
+
+    // Update theme-color meta tag
+    const metaThemeColor = document.querySelector('meta[name="theme-color"]');
+    if (metaThemeColor) {
+      metaThemeColor.setAttribute('content', effectiveTheme === 'light' ? '#f8fafc' : '#0d0f14');
     }
+
+    // Update header toggle button icon & label
+    const toggleBtn = document.getElementById('btn-theme-toggle');
+    const iconSpan = document.getElementById('theme-toggle-icon');
+    if (toggleBtn && iconSpan) {
+      if (effectiveTheme === 'light') {
+        iconSpan.innerHTML = ICONS.moon;
+        toggleBtn.setAttribute('title', 'Switch to Dark Mode (T)');
+        toggleBtn.setAttribute('aria-label', 'Switch to Dark Mode');
+      } else {
+        iconSpan.innerHTML = ICONS.sun;
+        toggleBtn.setAttribute('title', 'Switch to Light Mode (T)');
+        toggleBtn.setAttribute('aria-label', 'Switch to Light Mode');
+      }
+    }
+
+    // Re-render charts with matching contrast colors if already initialized
+    try {
+      const expenses = this.state.getFilteredExpenses ? this.state.getFilteredExpenses() : this.state.getState().expenses;
+      const currency = this.state.getState().settings.currencySymbol || '₹';
+      this.renderCharts(expenses, currency);
+    } catch {
+      // Ignored during early initialization
+    }
+
+    // Attach system theme change listener once
+    if (!this.systemThemeListenerAttached && window.matchMedia) {
+      this.systemThemeListenerAttached = true;
+      window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
+        if (this.state.getState().settings.theme === 'system') {
+          this.applyTheme('system');
+        }
+      });
+    }
+  }
+
+  /**
+   * 1-Click Theme Toggle Button Handler
+   */
+  bindThemeToggle() {
+    const toggleBtn = document.getElementById('btn-theme-toggle');
+    if (!toggleBtn) return;
+
+    toggleBtn.onclick = () => {
+      const currentTheme = this.state.getState().settings.theme || 'dark';
+      let nextTheme = 'light';
+
+      if (currentTheme === 'light') {
+        nextTheme = 'dark';
+      } else if (currentTheme === 'dark') {
+        nextTheme = 'light';
+      } else {
+        const isSystemDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+        nextTheme = isSystemDark ? 'light' : 'dark';
+      }
+
+      this.state.updateSettings({ theme: nextTheme });
+      this.applyTheme(nextTheme);
+
+      // Sync settings modal dropdown if open/rendered
+      const themeSelect = document.getElementById('setting-theme');
+      if (themeSelect) themeSelect.value = nextTheme;
+
+      toast.show({
+        message: `Switched to ${nextTheme === 'light' ? 'Light' : 'Dark'} mode`,
+        type: 'info',
+        duration: 2500,
+      });
+    };
   }
 
   /**
@@ -957,35 +1471,152 @@ export class UIRenderer {
     window.addEventListener('keydown', (e) => {
       // Escape closes open modals
       if (e.key === 'Escape') {
-        document.querySelectorAll('.modal--open').forEach((m) => m.classList.remove('modal--open'));
+        const openModal = document.querySelector('.modal--open');
+        if (openModal) {
+          this.closeModal(openModal.id);
+          return;
+        }
       }
-      // Ctrl/Cmd + / focuses search
-      if ((e.ctrlKey || e.metaKey) && e.key === '/') {
+
+      // Check if user is actively interacting with an editable field
+      const activeEl = document.activeElement;
+      const isInput = activeEl && ['INPUT', 'TEXTAREA', 'SELECT'].includes(activeEl.tagName);
+
+      // Cmd/Ctrl + K or / focuses search (even if in input for Cmd+K, but / only outside input)
+      if ((e.ctrlKey || e.metaKey) && (e.key === 'k' || e.key === 'K' || e.key === '/')) {
         e.preventDefault();
         const searchInput = document.getElementById('search-input');
-        if (searchInput) searchInput.focus();
+        if (searchInput) {
+          searchInput.focus();
+          searchInput.select();
+        }
+        return;
+      }
+
+      // Cmd/Ctrl + Z triggers undo delete
+      if ((e.ctrlKey || e.metaKey) && (e.key === 'z' || e.key === 'Z') && !e.shiftKey) {
+        if (!isInput) {
+          e.preventDefault();
+          const restored = this.state.undoDelete();
+          if (restored) {
+            toast.show({
+              message: `Restored "${restored.category}" (${formatCurrency(restored.amount, this.state.getState().settings.currencySymbol)})`,
+              type: 'success',
+            });
+          } else {
+            toast.show({ message: 'Nothing to undo', type: 'info' });
+          }
+          return;
+        }
+      }
+
+      // Single-letter hotkeys only when NOT focused on form input
+      if (!isInput && !e.ctrlKey && !e.metaKey && !e.altKey) {
+        if (e.key === '/') {
+          e.preventDefault();
+          const searchInput = document.getElementById('search-input');
+          if (searchInput) {
+            searchInput.focus();
+            searchInput.select();
+          }
+        } else if (e.key === 'n' || e.key === 'N') {
+          e.preventDefault();
+          const amountInput = document.getElementById('amount');
+          if (amountInput) {
+            amountInput.focus();
+            amountInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          }
+        } else if (e.key === 'f' || e.key === 'F') {
+          e.preventDefault();
+          const filtersPanel = document.getElementById('advanced-filters-panel');
+          const toggleFilterBtn = document.getElementById('btn-toggle-filters');
+          if (filtersPanel && filtersPanel.classList.contains('is-collapsed')) {
+            filtersPanel.classList.remove('is-collapsed');
+            if (toggleFilterBtn) {
+              toggleFilterBtn.classList.add('is-active');
+              toggleFilterBtn.setAttribute('aria-expanded', 'true');
+            }
+          }
+          const filterCat = document.getElementById('filter-category');
+          if (filterCat) {
+            filterCat.focus();
+            filterCat.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          }
+        } else if (e.key === 'b' || e.key === 'B') {
+          e.preventDefault();
+          const openBtn = document.getElementById('btn-open-settings');
+          const budgetInput = document.getElementById('setting-budget');
+          this.openModal('settings-modal', openBtn);
+          if (budgetInput) {
+            setTimeout(() => {
+              budgetInput.focus();
+              budgetInput.select();
+            }, 120);
+          }
+        } else if (e.key === 't' || e.key === 'T') {
+          e.preventDefault();
+          const toggleBtn = document.getElementById('btn-theme-toggle');
+          if (toggleBtn) toggleBtn.click();
+        } else if (e.key === '?') {
+          e.preventDefault();
+          const shortcutsBtn = document.getElementById('btn-open-shortcuts');
+          this.openModal('shortcuts-modal', shortcutsBtn);
+        }
       }
     });
   }
 
   displayFormErrors(formElement, errors) {
+    let firstInvalidInput = null;
+
     Object.entries(errors).forEach(([field, msg]) => {
       const input = formElement.querySelector(`[name="${field}"], #${field}, #edit-${field}`);
       if (input) {
         input.classList.add('is-invalid');
+        input.setAttribute('aria-invalid', 'true');
+
+        const errorId = `error-${input.id || field}`;
         let errorEl = input.parentElement.querySelector('.form-error-msg');
         if (!errorEl) {
           errorEl = document.createElement('div');
           errorEl.className = 'form-error-msg';
+          errorEl.id = errorId;
+          errorEl.setAttribute('role', 'alert');
           input.parentElement.appendChild(errorEl);
         }
         errorEl.textContent = msg;
+        input.setAttribute('aria-describedby', errorId);
+
+        if (!firstInvalidInput) {
+          firstInvalidInput = input;
+        }
+
+        // Real-time clearance when user modifies the invalid field
+        const clearListener = () => {
+          input.classList.remove('is-invalid');
+          input.removeAttribute('aria-invalid');
+          input.removeAttribute('aria-describedby');
+          const err = input.parentElement.querySelector('.form-error-msg');
+          if (err) err.remove();
+          input.removeEventListener('input', clearListener);
+          input.removeEventListener('change', clearListener);
+        };
+        input.addEventListener('input', clearListener);
+        input.addEventListener('change', clearListener);
       }
     });
+
+    if (firstInvalidInput) {
+      firstInvalidInput.focus();
+    }
   }
 
   clearFormErrors(formElement) {
-    formElement.querySelectorAll('.is-invalid').forEach((el) => el.classList.remove('is-invalid'));
+    formElement.querySelectorAll('.is-invalid').forEach((el) => {
+      el.classList.remove('is-invalid');
+      el.removeAttribute('aria-invalid');
+      el.removeAttribute('aria-describedby');
+    });
     formElement.querySelectorAll('.form-error-msg').forEach((el) => el.remove());
   }
 }

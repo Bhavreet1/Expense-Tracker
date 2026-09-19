@@ -43,6 +43,13 @@
     opacity: 0;
     transition: transform $transition-fast, opacity $transition-fast;
 
+    @include respond-to(mobile) {
+      width: calc(100% - 1rem);
+      max-height: 92vh;
+      padding: $space-4;
+      border-radius: $radius-md;
+    }
+
     &--lg {
       max-width: 680px;
     }
@@ -65,18 +72,25 @@
   &__close {
     background: transparent;
     border: none;
-    padding: 4px;
+    padding: 8px;
     display: inline-flex;
     align-items: center;
     justify-content: center;
     color: $text-muted;
     border-radius: $radius-sm;
     cursor: pointer;
+    min-width: 36px;
+    min-height: 36px;
     transition: color $transition-fast, background-color $transition-fast;
 
     &:hover {
       color: $text-primary;
       background-color: $surface-elevated;
+    }
+
+    &:focus-visible {
+      outline: 2px solid $accent;
+      outline-offset: 2px;
     }
 
     svg {
@@ -98,6 +112,16 @@
     margin-top: $space-4;
     padding-top: $space-3;
     border-top: 1px solid $border-subtle;
+
+    @include respond-to(mobile) {
+      flex-direction: column-reverse;
+      gap: $space-2;
+
+      .btn {
+        width: 100%;
+        min-height: 42px;
+      }
+    }
   }
 }
 
@@ -111,6 +135,19 @@
   border-radius: $radius-pill;
   font-size: 0.75rem;
   color: $text-secondary;
+
+  &__icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 1;
+
+    svg {
+      width: 13px;
+      height: 13px;
+      flex-shrink: 0;
+    }
+  }
 
   &__remove {
     display: inline-flex;
@@ -127,9 +164,177 @@
       color: $danger;
     }
 
+    &:focus-visible {
+      outline: 2px solid $accent;
+      border-radius: 2px;
+    }
+
     svg {
       width: 12px;
       height: 12px;
     }
   }
+}
+
+// Shortcuts Cheat-Sheet
+.shortcuts-list {
+  display: flex;
+  flex-direction: column;
+  gap: $space-2;
+}
+
+.shortcut-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: $space-2 $space-3;
+  background-color: $surface-elevated;
+  border: 1px solid $border-color;
+  border-radius: $radius-md;
+  gap: $space-2;
+
+  @include respond-to(xs) {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 6px;
+  }
+
+  .shortcut-desc {
+    font-size: 0.8125rem;
+    color: $text-secondary;
+  }
+
+  .shortcut-keys {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    flex-wrap: wrap;
+  }
+
+  .shortcut-or {
+    font-size: 0.75rem;
+    color: $text-muted;
+    margin: 0 2px;
+  }
+
+  kbd {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 24px;
+    height: 24px;
+    padding: 0 6px;
+    font-family: inherit;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: $text-primary;
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 4px;
+    box-shadow: 0 1px 0 rgba(0, 0, 0, 0.3);
+  }
+}
+
+// Import Dropzone accessible focus
+.import-dropzone {
+  border: 1px dashed $border-color;
+  border-radius: $radius-md;
+  padding: 2rem 1rem;
+  text-align: center;
+  cursor: pointer;
+  background: $surface-elevated;
+  transition: all $transition-fast;
+
+  @include respond-to(mobile) {
+    padding: 1.25rem 0.75rem;
+  }
+
+  &:hover {
+    background: $surface-hover;
+    border-color: $accent;
+  }
+
+  &:focus-visible {
+    outline: 2px solid $accent;
+    outline-offset: 2px;
+  }
+
+  &__icon {
+    display: flex;
+    justify-content: center;
+    color: $accent;
+    margin-bottom: $space-2;
+  }
+}
+
+// Settings & Delete Modal Section Elements
+.settings-section-title {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: $text-secondary;
+  margin-top: 1.25rem;
+  margin-bottom: 0.75rem;
+
+  &:first-child {
+    margin-top: 0;
+  }
+}
+
+.custom-cat-input {
+  flex: 1;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid $border-color;
+  border-radius: $radius-md;
+  background-color: $surface-elevated;
+  color: $text-primary;
+  font-size: 0.875rem;
+
+  @include respond-to(mobile) {
+    font-size: 1rem !important;
+  }
+}
+
+.custom-categories-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  max-height: 140px;
+  overflow-y: auto;
+  padding: 0.5rem;
+  background-color: $surface-elevated;
+  border-radius: $radius-md;
+  border: 1px solid $border-color;
+}
+
+.danger-zone-box {
+  margin-top: 1.5rem;
+  padding: 1rem;
+  border: 1px solid rgba(239, 68, 68, 0.25);
+  border-radius: $radius-md;
+  background-color: $danger-subtle;
+
+  strong {
+    color: $danger;
+    display: block;
+    margin-bottom: 0.25rem;
+  }
+
+  p {
+    font-size: 0.8125rem;
+    color: $danger;
+    opacity: 0.9;
+    margin-bottom: 0.75rem;
+  }
+}
+
+.delete-preview-box {
+  font-weight: 600;
+  color: $danger;
+  padding: 0.75rem;
+  background-color: $danger-subtle;
+  border: 1px solid rgba(239, 68, 68, 0.25);
+  border-radius: $radius-md;
+  word-break: break-word;
 }

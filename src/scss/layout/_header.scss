@@ -7,14 +7,23 @@
   justify-content: space-between;
   align-items: center;
   padding: $space-3 $space-6;
-  background-color: $surface-primary;
+  padding-left: max(#{$space-6}, env(safe-area-inset-left));
+  padding-right: max(#{$space-6}, env(safe-area-inset-right));
+  background-color: $surface-glass;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
   border-bottom: 1px solid $border-color;
+  box-shadow: $shadow-sm;
   position: sticky;
   top: 0;
   z-index: 50;
+  transition: background-color $transition-normal, border-color $transition-normal;
 
   @include respond-to(mobile) {
-    padding: $space-3 $space-4;
+    padding: $space-2 $space-3;
+    padding-left: max(#{$space-3}, env(safe-area-inset-left));
+    padding-right: max(#{$space-3}, env(safe-area-inset-right));
+    padding-top: max(#{$space-2}, env(safe-area-inset-top));
   }
 
   &__left,
@@ -22,6 +31,11 @@
     display: flex;
     align-items: center;
     gap: $space-3;
+    min-width: 0;
+
+    @include respond-to(xs) {
+      gap: $space-2;
+    }
 
     .app-logo {
       width: 28px;
@@ -29,6 +43,11 @@
       object-fit: contain;
       border-radius: $radius-sm;
       flex-shrink: 0;
+
+      @include respond-to(xs) {
+        width: 24px;
+        height: 24px;
+      }
     }
 
     h1,
@@ -38,6 +57,17 @@
       letter-spacing: -0.01em;
       margin: 0;
       color: $text-primary;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+
+      @include respond-to(mobile) {
+        font-size: 1rem;
+      }
+
+      @include respond-to(xs) {
+        font-size: 0.9375rem;
+      }
     }
   }
 
@@ -46,5 +76,45 @@
     display: flex;
     align-items: center;
     gap: $space-2;
+    flex-shrink: 0;
+
+    .btn--outline {
+      background-color: $surface-primary;
+      border-color: $border-color;
+      color: $text-secondary;
+
+      &:hover {
+        background-color: $surface-hover;
+        color: $text-primary;
+        border-color: $border-focus;
+      }
+
+      &:active {
+        background-color: $surface-elevated;
+      }
+    }
+
+    @include respond-to(mobile) {
+      gap: 6px;
+
+      #btn-open-shortcuts {
+        display: none !important;
+      }
+
+      #btn-open-import {
+        .btn-text {
+          display: none;
+        }
+        padding: 0.4rem;
+        width: 34px;
+        height: 34px;
+      }
+
+      .btn--icon {
+        width: 34px;
+        height: 34px;
+        padding: 0.4rem;
+      }
+    }
   }
 }
